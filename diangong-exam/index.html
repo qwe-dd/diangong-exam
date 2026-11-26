@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高级电工模拟考试</title>
+<style>
+  :root{
+    --bg:#f2f5f9; --card:#fff; --line:#e3e9f0; --ink:#1f2d3d; --sub:#6b7c8f;
+    --blue:#1f6feb; --blue-d:#1858c4; --green:#1aa260; --red:#e5484d; --orange:#f5a623;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans SC",-apple-system,"Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:860px;margin:0 auto;padding:18px 16px 60px}
+  header.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  header.top h1{font-size:20px}
+  header.top .tag{font-size:12px;color:var(--sub)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:10px;padding:10px 16px;font-size:15px;cursor:pointer;transition:.15s}
+  .btn-primary{background:var(--blue);color:#fff}
+  .btn-primary:hover{background:var(--blue-d)}
+  .btn-ghost{background:#eef3fb;color:var(--blue)}
+  .btn-ghost:hover{background:#e2ecfa}
+  .btn-danger{background:#fdecec;color:var(--red)}
+  .btn-line{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .muted{color:var(--sub);font-size:13px}
+  label.fld{display:block;font-size:14px;margin:10px 0 4px;color:var(--sub)}
+  input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:15px;font-family:inherit;background:#fff}
+  textarea{resize:vertical;min-height:120px}
+  .stat{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0}
+  .stat .box{flex:1;min-width:120px;background:#f7faff;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+  .stat .num{font-size:26px;font-weight:700;color:var(--blue)}
+  .stat .lbl{font-size:13px;color:var(--sub)}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0;cursor:pointer;transition:.12s}
+  .opt:hover{border-color:var(--blue)}
+  .opt.sel{border-color:var(--blue);background:#f2f8ff}
+  .opt.correct{border-color:var(--green);background:#f0faf4}
+  .opt.wrong{border-color:var(--red);background:#fdf1f1}
+  .opt .key{font-weight:700;color:var(--blue);min-width:22px}
+  .qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+  .qtype{font-size:12px;color:#fff;background:var(--blue);border-radius:6px;padding:2px 8px}
+  .qtype.judge{background:var(--orange)}
+  .qtype.multi{background:#7c5cff}
+  .timer{font-variant-numeric:tabular-nums;font-weight:700;font-size:18px}
+  .timer.warn{color:var(--red)}
+  .progress{height:8px;background:#eef2f7;border-radius:8px;overflow:hidden;margin:12px 0}
+  .progress i{display:block;height:100%;background:var(--blue);width:0}
+  .ans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px;margin-top:10px}
+  .ans-grid button{aspect-ratio:1;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;font-size:14px}
+  .ans-grid button.done{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .ans-grid button.mark{border-color:var(--orange);color:var(--orange)}
+  .ans-grid button.cur{outline:2px solid var(--ink)}
+  .nav{display:flex;justify-content:space-between;margin-top:16px;gap:10px}
+  .score-big{font-size:44px;font-weight:800;text-align:center;margin:10px 0}
+  .score-pass{color:var(--green)} .score-fail{color:var(--red)}
+  .result-meta{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;color:var(--sub);font-size:14px}
+  .tag-pill{display:inline-block;font-size:12px;border-radius:6px;padding:2px 8px;margin-left:6px}
+  .pill-r{background:#fdecec;color:var(--red)}
+  .pill-w{background:#eef3fb;color:var(--blue)}
+  .analysis{margin-top:10px;background:#f7faff;border-left:3px solid var(--blue);padding:10px 12px;border-radius:8px;font-size:14px}
+  .hidden{display:none}
+  .toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:#1f2d3d;color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.2s}
+  .toast.show{opacity:1}
+  .tabs{display:flex;gap:8px;margin-bottom:14px}
+  .tabs button{padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:14px}
+  .tabs button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left}
+  .del{color:var(--red);cursor:pointer;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>⚡ 高级电工 · 模拟考试</h1>
+    <span class="tag" id="topStat"></span>
+  </header>
+
+  <!-- ===== 首页 ===== -->
+  <section id="view-home">
+    <div class="card">
+      <div class="stat">
+        <div class="box"><div class="num" id="stTotal">0</div><div class="lbl">题库总数</div></div>
+        <div class="box"><div class="num" id="stSingle">0</div><div class="lbl">单选</div></div>
+        <div class="box"><div class="num" id="stMulti">0</div><div class="lbl">多选</div></div>
+        <div class="box"><div class="num" id="stJudge">0</div><div class="lbl">判断</div></div>
+      </div>
+      <label class="fld">抽取题量</label>
+      <select id="setCount">
+        <option value="20">20 题</option>
+        <option value="30" selected>30 题</option>
+        <option value="50">50 题</option>
+        <option value="all">全部题目</option>
+      </select>
+      <label class="fld">考试时长（分钟）</label>
+      <select id="setTime">
+        <option value="15">15 分钟</option>
+        <option value="20">20 分钟</option>
+        <option value="30" selected>30 分钟</option>
+        <option value="45">45 分钟</option>
+        <option value="60">60 分钟</option>
+      </select>
+      <div class="row" style="margin-top:16px">
+        <button class="btn btn-primary" id="btnStart">开始模拟考试</button>
+        <button class="btn btn-ghost" id="btnGoManage">题库管理 / 录入</button>
+        <button class="btn btn-line" id="btnWrong">错题本 <span id="wrongCount" class="muted"></span></button>
+      </div>
+      <p class="muted" style="margin-top:12px">提示：题目保存在本机浏览器（localStorage），换浏览器或清理缓存会丢失，建议在「题库管理」里导出备份。</p>
+    </div>
+  </section>
+
+  <!-- ===== 题库管理 ===== -->
+  <section id="view-manage" class="hidden">
+    <div class="tabs">
+      <button class="on" data-tab="add">单题录入</button>
+      <button data-tab="import">批量导入 JSON</button>
+      <button data-tab="list">题目列表</button>
+    </div>
+
+    <div class="card" id="tab-add">
+      <label class="fld">题型</label>
+      <select id="fType">
+        <option value="single">单选题</option>
+        <option value="multi">多选题</option>
+        <option value="judge">判断题</option>
+      </select>
+      <label class="fld">题干</label>
+      <textarea id="fStem" placeholder="请输入题目内容"></textarea>
+      <div id="optBox">
+        <label class="fld">选项 A</label><input id="fA" placeholder="选项 A">
+        <label class="fld">选项 B</label><input id="fB" placeholder="选项 B">
+        <label class="fld">选项 C</label><input id="fC" placeholder="选项 C">
+        <label class="fld">选项 D</label><input id="fD" placeholder="选项 D">
+      </div>
+      <label class="fld">答案（单选填字母如 A；多选填字母组合如 ABD；判断填 对 / 错）</label>
+      <input id="fAns" placeholder="例如 A / ABD / 对">
+      <label class="fld">解析（可选）</label>
+      <textarea id="fAna" placeholder="题目解析，可留空"></textarea>
+      <div class="row" style="margin-top:12px">
+        <button class="btn btn-primary" id="btnAdd">加入题库</button>
+        <button class="btn btn-line" id="btnClearForm">清空表单</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="tab-import">
+      <p class="muted" style="margin-bottom:8px">粘贴 JSON 数组，格式示例：</p>
+      <pre class="muted" style="background:#f7faff;padding:10px;border-radius:8px;white-space:pre-wrap">[{"type":"single","stem":"题干","options":{"A":"甲","B":"乙","C":"丙","D":"丁"},"answer":"A","analysis":"解析"},
+{"type":"judge","stem":"题干","answer":"对","analysis":"解析"}]</pre>
+      <textarea id="jsonArea" placeholder='[{"type":"single",...}]'></textarea>
+      <div class="row" style="margin-top:12px">
+        <button class="btn btn-primary" id="btnImportAppend">追加导入</button>
+        <button class="btn btn-ghost" id="btnImportReplace">覆盖导入</button>
+        <button class="btn btn-line" id="btnExport">导出题库 JSON</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="tab-list">
+      <div id="qList"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn btn-danger" id="btnClearAll">清空全部题目</button>
+      </div>
+    </div>
+
+    <div class="nav"><button class="btn btn-line" id="btnBackHome1">返回首页</button></div>
+  </section>
+
+  <!-- ===== 考试页 ===== -->
+  <section id="view-exam" class="hidden">
+    <div class="card">
+      <div class="qhead">
+        <div><strong id="examTitle">模拟考试</strong></div>
+        <div class="timer" id="timer">30:00</div>
+      </div>
+      <div class="progress"><i id="progBar"></i></div>
+      <div id="qBody"></div>
+      <div class="ans-grid" id="ansGrid"></div>
+      <div class="nav">
+        <button class="btn btn-line" id="btnPrev">上一题</button>
+        <div class="row">
+          <button class="btn btn-ghost" id="btnMark">标记</button>
+          <button class="btn btn-line" id="btnNext">下一题</button>
+          <button class="btn btn-primary" id="btnSubmit">交卷</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 结果页 ===== -->
+  <section id="view-result" class="hidden">
+    <div class="card">
+      <div class="score-big" id="scoreBig"></div>
+      <div class="result-meta">
+        <span id="metaRight"></span><span id="metaWrong"></span><span id="metaUndone"></span>
+      </div>
+      <div class="row" style="justify-content:center;margin-top:14px">
+        <button class="btn btn-primary" id="btnAgain">再考一次</button>
+        <button class="btn btn-ghost" id="btnReview">查看答题解析</button>
+        <button class="btn btn-line" id="btnBackHome2">返回首页</button>
+      </div>
+    </div>
+    <div id="reviewBox"></div>
+  </section>
+
+  <!-- ===== 错题本 ===== -->
+  <section id="view-wrong" class="hidden">
+    <div class="card">
+      <div id="wrongList"></div>
+      <div class="nav">
+        <button class="btn btn-line" id="btnBackHome3">返回首页</button>
+        <button class="btn btn-danger" id="btnClearWrong">清空错题本</button>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 数据层 ============ */
+const KEY_BANK='ee_bank_v2', KEY_WRONG='ee_wrong_v2';
+const SAMPLE=[
+ {type:"single",stem:"发现电气设备漏电时，首先应采取的措施是（ ）。",options:{A:"继续作业并记录",B:"切断电源后检查",C:"直接用手触碰外壳",D:"用水冲洗"},answer:"B",analysis:"发现漏电必须先切断电源，再进行检查处理，防止触电事故扩大。"},
+ {type:"single",stem:"低压系统测量绝缘电阻时，一般应选用多少伏的兆欧表？（ ）",options:{A:"500V",B:"1000V",C:"2500V",D:"3000V"},answer:"A",analysis:"低压电气设备通常用 500V 兆欧表测量绝缘电阻，高压设备才选用更高电压等级。"},
+ {type:"single",stem:"一般保护接地的接地电阻要求不大于（ ）。",options:{A:"2Ω",B:"4Ω",C:"6Ω",D:"8Ω"},answer:"B",analysis:"常见低压保护接地电阻一般要求不大于 4Ω，特殊场合按规范另定。"},
+ {type:"single",stem:"三相异步电动机的过载保护通常选用（ ）。",options:{A:"热继电器",B:"电流继电器",C:"时间继电器",D:"电压继电器"},answer:"A",analysis:"热继电器利用电流热效应动作，主要用于电动机长期过载保护。"},
+ {type:"single",stem:"用电压表测量电路电压时，电压表应与被测电路（ ）。",options:{A:"并联",B:"串联",C:"混联",D:"短路"},answer:"A",analysis:"电压表内阻很大，测量电压时必须并联在被测两端。"},
+ {type:"single",stem:"熔断器在电路中主要起（ ）作用。",options:{A:"过载保护",B:"短路保护",C:"欠压保护",D:"过压保护"},answer:"B",analysis:"熔丝在短路大电流下迅速熔断，主要用于短路保护；长期过载保护一般靠热继电器。"},
+ {type:"single",stem:"触电急救的第一步是（ ）。",options:{A:"切断电源",B:"人工呼吸",C:"胸外按压",D:"拨打急救电话"},answer:"A",analysis:"先使触电者脱离电源，再进行现场急救并呼救，避免施救者连带触电。"},
+ {type:"single",stem:"扑救带电电气设备火灾时，不能使用（ ）。",options:{A:"干粉灭火器",B:"二氧化碳灭火器",C:"泡沫灭火器",D:"干砂"},answer:"C",analysis:"泡沫灭火器含水溶液有导电性，带电设备火灾禁用；应使用干粉、二氧化碳等不导电灭火剂。"},
+ {type:"single",stem:"采用星三角（Y-△）降压启动时，启动电流约为全压直接启动的（ ）。",options:{A:"1/2",B:"1/3",C:"1/4",D:"1/5"},answer:"B",analysis:"星三角启动时定子绕组每相电压降为原来的 1/√3，启动电流约为全压启动的 1/3。"},
+ {type:"single",stem:"保护接零适用于（ ）的供电系统。",options:{A:"中性点接地",B:"中性点不接地",C:"三相三线制",D:"任意系统"},answer:"A",analysis:"保护接零用于中性点直接接地的三相四线制系统，外壳接零线形成短路回路。"},
+ {type:"single",stem:"漏电保护器的主要作用是（ ）。",options:{A:"防止人身触电和电气火灾",B:"提高电压",C:"增大功率因数",D:"稳定电流"},answer:"A",analysis:"漏电保护器检测剩余电流，动作后切断电源，用于防触电和接地故障火灾。"},
+ {type:"single",stem:"对频繁起动的三相异步电动机，宜选用的控制电器是（ ）。",options:{A:"铁壳开关",B:"低压断路器",C:"交流接触器",D:"转换开关"},answer:"C",analysis:"接触器适合频繁通断主电路，配合按钮、继电器实现自动与远程控制。"},
+ {type:"single",stem:"纯电阻性交流电路中，电压与电流的相位关系是（ ）。",options:{A:"同相",B:"电压超前电流 90°",C:"电流超前电压 90°",D:"反相"},answer:"A",analysis:"纯电阻负载上电压与电流同相位，不产生无功功率。"},
+ {type:"single",stem:"在材料和长度相同时，导线截面积越大，其电阻值（ ）。",options:{A:"越大",B:"越小",C:"不变",D:"先大后小"},answer:"B",analysis:"电阻与截面积成反比，截面越大电阻越小，载流量也越大。"},
+ {type:"single",stem:"变频器按直流滤波方式可分为电压型和（ ）型。",options:{A:"电阻",B:"电流",C:"电感",D:"电容"},answer:"B",analysis:"变频器按滤波储能环节分为电压型（大电容）和电流型（大电感）两类。"},
+ {type:"single",stem:"电流互感器运行时，二次侧严禁（ ）。",options:{A:"开路",B:"短路",C:"接地",D:"接电流表"},answer:"A",analysis:"二次侧开路会产生高压，危及人身和设备安全，因此电流互感器二次侧不得开路。"},
+ {type:"single",stem:"交流接触器的主触点主要用于（ ）。",options:{A:"接通和分断主电路",B:"接通控制电路",C:"显示信号",D:"实现互锁"},answer:"A",analysis:"主触点串在主电路中控制电动机等大电流负载；辅助触点用于控制与信号回路。"},
+ {type:"single",stem:"使用万用表测量电阻之前，应先进行（ ）。",options:{A:"机械调零",B:"欧姆调零（表笔短接调零）",C:"通电预热",D:"量程归零"},answer:"B",analysis:"测电阻前将两表笔短接，调节欧姆调零旋钮使指针指在 0Ω 处。"},
+ {type:"single",stem:"三相四线制供电系统中，中性线（零线）上严禁装设（ ）。",options:{A:"熔断器和开关",B:"接线端子",C:"绝缘套管",D:"重复接地"},answer:"A",analysis:"中性线一旦断开会造成中性点位移、三相电压失衡，因此中性线上不允许装熔断器和开关。"},
+ {type:"single",stem:"三相异步电动机的空载电流一般约为额定电流的（ ）。",options:{A:"20%～50%",B:"50%～80%",C:"80%～100%",D:"100%以上"},answer:"A",analysis:"小型异步电机空载电流通常为额定电流的 20%～50%，过大往往说明异常。"},
+ {type:"single",stem:"发电机和变压器中性点直接接地属于（ ）。",options:{A:"工作接地",B:"保护接地",C:"过电压保护接地",D:"防静电接地"},answer:"A",analysis:"为保证系统正常运行而将中性点接地，称为工作接地；保护接地是为防触电。"},
+ {type:"single",stem:"绝缘手套、绝缘靴属于电工的（ ）。",options:{A:"基本绝缘安全用具",B:"辅助绝缘安全用具",C:"测量仪表",D:"起重工具"},answer:"B",analysis:"绝缘手套、绝缘靴为辅助绝缘安全用具，不能直接操作高压带电体，需配合基本安全用具。"},
+ {type:"single",stem:"变频器停机后内部电容仍存有残余电压，检修前应先（ ）。",options:{A:"直接拆线",B:"充分放电",C:"短接输出端",D:"加水冷却"},answer:"B",analysis:"断电后直流母线电容尚存高压，必须按规定放电确认无电后再检修。"},
+ {type:"single",stem:"三相异步电动机正常运行时，转子转速总是（ ）同步转速。",options:{A:"等于",B:"低于",C:"高于",D:"等于或高于"},answer:"B",analysis:"转子转速略低于同步转速才有转差、才能产生电磁转矩，这是异步电动机的基本特性。"},
+ {type:"multi",stem:"三相异步电动机的常见故障包括（ ）。",options:{A:"定子绕组短路",B:"转子绕组接地",C:"轴承损坏",D:"定转子气隙过大"},answer:"ABCD",analysis:"绕组短路接地、轴承损坏、气隙异常都是电机常见故障，会引起发热、振动、异响或堵转。"},
+ {type:"multi",stem:"可用于减小三相异步电动机启动电流的措施有（ ）。",options:{A:"自耦变压器降压启动",B:"星三角降压启动",C:"变频启动",D:"直接全压启动"},answer:"ABC",analysis:"降压、变频等方式可限制启动电流；直接全压启动启动电流最大，不属于限流措施。"},
+ {type:"multi",stem:"影响电气设备绝缘性能的主要因素有（ ）。",options:{A:"温度与湿度",B:"机械应力",C:"化学腐蚀",D:"使用时间老化"},answer:"ABCD",analysis:"温湿度、机械受力、腐蚀和长期老化都会降低绝缘电阻和介电强度。"},
+ {type:"multi",stem:"下列属于低压电器的有（ ）。",options:{A:"断路器",B:"接触器",C:"继电器",D:"高压隔离开关"},answer:"ABC",analysis:"断路器、接触器、继电器属低压电器；高压隔离开关属于高压电器。"},
+ {type:"multi",stem:"电气设备停电检修的安全技术措施包括（ ）。",options:{A:"断开电源",B:"验电",C:"装设临时接地线",D:"悬挂标示牌并装设遮栏"},answer:"ABCD",analysis:"停电、验电、挂接地线、悬挂标示牌和装设遮栏是停电作业必备的技术措施。"},
+ {type:"multi",stem:"下列属于电工安全防护用具的有（ ）。",options:{A:"绝缘手套",B:"绝缘靴",C:"高压验电器",D:"普通金属直尺"},answer:"ABC",analysis:"绝缘手套、绝缘靴、验电器为专用安全用具；普通金属尺导电，不能作为电工安全用具。"},
+ {type:"judge",stem:"测量电气设备绝缘电阻时，可以在设备带电的情况下进行。",answer:"错",analysis:"带电测绝缘既无法测得准确值，又有触电和仪表损坏风险，必须停电测量。"},
+ {type:"judge",stem:"三相异步电动机的转子转速总是低于同步转速。",answer:"对",analysis:"存在转差才能产生感应电流和电磁转矩，因此转子转速略低于同步转速。"},
+ {type:"judge",stem:"应急情况下可以用铜丝、铁丝代替熔断器的熔丝使用。",answer:"错",analysis:"铜铁丝熔点高、不易熔断，会失去短路保护作用，严禁替代熔丝。"},
+ {type:"judge",stem:"漏电保护器能够在发生漏电或人身触电时快速切断电源。",answer:"对",analysis:"漏电保护器检测剩余电流并动作跳闸，是防触电和电气火灾的重要保护装置。"},
+ {type:"judge",stem:"电机运行中出现轻微振动和异响，可以继续长时间运行而不用检修。",answer:"错",analysis:"振动异响往往是轴承、绕组或装配异常的信号，应及时检查，带病运行会扩大损坏。"},
+ {type:"judge",stem:"变频器停机后内部电容仍存有残余电压，检修前必须先放电。",answer:"对",analysis:"直流母线电容断电后仍带高压，需放电并确认无电后再接触线路。"},
+ {type:"judge",stem:"在三相四线制系统中，中性线上允许装设熔断器。",answer:"错",analysis:"中性线装熔断器熔断后会导致零线断开、电压失衡，中性线上严禁装熔断器和开关。"},
+ {type:"judge",stem:"电缆敷设时可以随意弯曲，弯曲半径不受限制。",answer:"错",analysis:"电缆弯曲半径有规范要求，过度弯曲会损伤绝缘和芯线，缩短使用寿命。"},
+ {type:"judge",stem:"多级放大器的总电压放大倍数等于各级电压放大倍数之积。",answer:"对",analysis:"各级增益逐级相乘得到总电压放大倍数，这是多级放大电路的基本关系。"},
+ {type:"judge",stem:"电气设备的金属外壳必须进行保护性接地或接零。",answer:"对",analysis:"外壳接地接零可在绝缘破损时降低触电风险，是强制安全要求。"}
+];
+let bank=load(KEY_BANK,SAMPLE);
+let wrong=load(KEY_WRONG,[]);
+
+function load(k,def){try{const v=JSON.parse(localStorage.getItem(k));return Array.isArray(v)?v:def}catch(e){return def}}
+function save(){localStorage.setItem(KEY_BANK,JSON.stringify(bank));localStorage.setItem(KEY_WRONG,JSON.stringify(wrong))}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800)}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+/* ============ 视图切换 ============ */
+const views=['home','manage','exam','result','wrong'];
+function show(v){views.forEach(x=>document.getElementById('view-'+x).classList.toggle('hidden',x!==v));window.scrollTo(0,0)}
+
+/* ============ 首页统计 ============ */
+function refreshHome(){
+  document.getElementById('stTotal').textContent=bank.length;
+  document.getElementById('stSingle').textContent=bank.filter(q=>q.type==='single').length;
+  document.getElementById('stMulti').textContent=bank.filter(q=>q.type==='multi').length;
+  document.getElementById('stJudge').textContent=bank.filter(q=>q.type==='judge').length;
+  document.getElementById('wrongCount').textContent=wrong.length?`(${wrong.length})`:'';
+  document.getElementById('topStat').textContent=`题库 ${bank.length} 题`;
+}
+
+/* ============ 题库管理 ============ */
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  ['add','import','list'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));
+  if(b.dataset.tab==='list')renderList();
+});
+
+document.getElementById('fType').onchange=function(){
+  document.getElementById('optBox').style.display=this.value==='judge'?'none':'block';
+};
+
+document.getElementById('btnAdd').onclick=()=>{
+  const type=document.getElementById('fType').value;
+  const stem=document.getElementById('fStem').value.trim();
+  let options=null,answer=document.getElementById('fAns').value.trim().toUpperCase();
+  const analysis=document.getElementById('fAna').value.trim();
+  if(!stem){toast('请填写题干');return}
+  if(type!=='judge'){
+    options={};
+    ['A','B','C','D'].forEach(k=>{const v=document.getElementById('f'+k).value.trim();if(v)options[k]=v});
+    if(Object.keys(options).length<2){toast('选项至少填两项');return}
+    if(!/^[A-D]+$/.test(answer)){toast('答案格式不对（字母）');return}
+  }else{
+    if(!['对','错','√','×','T','F'].includes(answer)){toast('判断题答案填 对/错');return}
+    answer=answer==='√'||answer==='T'?'对':(answer==='×'||answer==='F'?'错':answer);
+  }
+  bank.push({type,stem,options,answer,analysis});save();refreshHome();renderList();
+  toast('已加入题库');clearForm();
+};
+function clearForm(){['fStem','fA','fB','fC','fD','fAns','fAna'].forEach(id=>document.getElementById(id).value='')}
+document.getElementById('btnClearForm').onclick=clearForm;
+
+document.getElementById('btnImportAppend').onclick=()=>importJson(false);
+document.getElementById('btnImportReplace').onclick=()=>importJson(true);
+function importJson(replace){
+  const txt=document.getElementById('jsonArea').value.trim();
+  if(!txt){toast('请先粘贴 JSON');return}
+  let arr;try{arr=JSON.parse(txt)}catch(e){toast('JSON 格式错误：'+e.message);return}
+  if(!Array.isArray(arr)){toast('必须是题目数组');return}
+  const clean=arr.map((q,i)=>{
+    if(!q.stem)throw new Error(`第 ${i+1} 题缺少题干`);
+    return {type:q.type||'single',stem:q.stem,options:q.options||null,answer:String(q.answer||'').trim().toUpperCase(),analysis:q.analysis||''};
+  });
+  if(replace)bank=clean;else bank=bank.concat(clean);
+  save();refreshHome();renderList();toast(`成功导入 ${clean.length} 题`);
+}
+document.getElementById('btnExport').onclick=()=>{
+  const blob=new Blob([JSON.stringify(bank,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='高级电工题库.json';a.click();URL.revokeObjectURL(a.href);
+};
+function renderList(){
+  const box=document.getElementById('qList');
+  if(!bank.length){box.innerHTML='<p class="muted">题库为空，请先录入或导入题目。</p>';return}
+  box.innerHTML='<table><thead><tr><th>#</th><th>题型</th><th>题干</th><th>答案</th><th></th></tr></thead><tbody>'+
+  bank.map((q,i)=>`<tr><td>${i+1}</td><td>${typeName(q.type)}</td><td>${esc(q.stem)}</td><td>${esc(q.answer)}</td><td><span class="del" data-i="${i}">删除</span></td></tr>`).join('')+'</tbody></table>';
+  box.querySelectorAll('.del').forEach(d=>d.onclick=()=>{bank.splice(+d.dataset.i,1);save();refreshHome();renderList();toast('已删除')});
+}
+document.getElementById('btnClearAll').onclick=()=>{if(confirm('确定清空全部题目？')){bank=[];save();refreshHome();renderList();toast('已清空')}};
+function typeName(t){return t==='single'?'单选':t==='multi'?'多选':'判断'}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+/* ============ 考试逻辑 ============ */
+let exam=null, timerId=null;
+document.getElementById('btnStart').onclick=()=>{
+  if(!bank.length){toast('题库为空，请先录入题目');return}
+  let n=document.getElementById('setCount').value;
+  n=n==='all'?bank.length:Math.min(+n,bank.length);
+  const time=+document.getElementById('setTime').value;
+  const questions=shuffle(bank).slice(0,n);
+  exam={questions,answers:Array(questions.length).fill(null),marked:Array(questions.length).fill(false),idx:0,remain:time*60,timeUp:false};
+  show('exam');renderQ();startTimer();
+};
+function startTimer(){
+  clearInterval(timerId);
+  timerId=setInterval(()=>{
+    exam.remain--;
+    const t=document.getElementById('timer');
+    const m=String(Math.floor(exam.remain/60)).padStart(2,'0'),s=String(exam.remain%60).padStart(2,'0');
+    t.textContent=`${m}:${s}`;t.classList.toggle('warn',exam.remain<=60);
+    if(exam.remain<=0){clearInterval(timerId);toast('时间到，自动交卷');submitExam(true)}
+  },1000);
+}
+function renderQ(){
+  const q=exam.questions[exam.idx];
+  const typeBadge={single:'单选',multi:'多选',judge:'判断'}[q.type];
+  let opts='';
+  if(q.type==='judge'){
+    opts=['对','错'].map(k=>{
+      const sel=exam.answers[exam.idx]===k;
+      return `<div class="opt ${sel?'sel':''}" data-v="${k}"><span class="key">${k==='对'?'✓':'✗'}</span><span>${k}</span></div>`;
+    }).join('');
+  }else{
+    opts=Object.entries(q.options).map(([k,v])=>{
+      const cur=exam.answers[exam.idx]||'';
+      const sel=q.type==='multi'?cur.includes(k):cur===k;
+      return `<div class="opt ${sel?'sel':''}" data-v="${k}"><span class="key">${k}</span><span>${esc(v)}</span></div>`;
+    }).join('');
+  }
+  document.getElementById('qBody').innerHTML=`
+    <div class="qhead">
+      <span class="qtype ${q.type}">${typeBadge}</span>
+      <span class="muted">第 ${exam.idx+1} / ${exam.questions.length} 题</span>
+    </div>
+    <p style="font-size:16px;margin:8px 0">${esc(q.stem)}</p>
+    ${opts}`;
+  document.querySelectorAll('#qBody .opt').forEach(o=>o.onclick=()=>pick(o.dataset.v));
+  // 答题卡
+  document.getElementById('ansGrid').innerHTML=exam.questions.map((_,i)=>{
+    let cls=i===exam.idx?'cur':'';
+    if(exam.answers[i])cls+=' done';
+    if(exam.marked[i])cls+=' mark';
+    return `<button class="${cls}" data-i="${i}">${i+1}</button>`;
+  }).join('');
+  document.querySelectorAll('#ansGrid button').forEach(b=>b.onclick=()=>{exam.idx=+b.dataset.i;renderQ()});
+  document.getElementById('progBar').style.width=(exam.answers.filter(Boolean).length/exam.questions.length*100)+'%';
+}
+function pick(v){
+  const q=exam.questions[exam.idx];
+  if(q.type==='multi'){
+    let cur=exam.answers[exam.idx]?exam.answers[exam.idx].split(''):[];
+    cur=cur.includes(v)?cur.filter(x=>x!==v):cur.concat(v);
+    exam.answers[exam.idx]=cur.sort().join('');
+  }else{
+    exam.answers[exam.idx]=v;
+  }
+  renderQ();
+}
+document.getElementById('btnPrev').onclick=()=>{if(exam.idx>0){exam.idx--;renderQ()}};
+document.getElementById('btnNext').onclick=()=>{if(exam.idx<exam.questions.length-1){exam.idx++;renderQ()}};
+document.getElementById('btnMark').onclick=()=>{exam.marked[exam.idx]=!exam.marked[exam.idx];renderQ();toast(exam.marked[exam.idx]?'已标记':'取消标记')};
+document.getElementById('btnSubmit').onclick=()=>{
+  const undone=exam.answers.filter(a=>!a).length;
+  if(!exam.timeUp && undone>0 && !confirm(`还有 ${undone} 题未作答，确定交卷吗？`))return;
+  submitExam(false);
+};
+
+/* ============ 判分 ============ */
+function norm(a){return String(a||'').replace(/\s/g,'').toUpperCase()}
+function submitExam(timeUp){
+  clearInterval(timerId);
+  let right=0;const detail=[];
+  exam.questions.forEach((q,i)=>{
+    const user=norm(exam.answers[i]);
+    const ok=user!=='' && user===norm(q.answer);
+    if(ok)right++;
+    else{ if(q.type!=='judge'||true){/* 错题入库：按题干去重 */} }
+    detail.push({q,user:exam.answers[i]||'',ok});
+  });
+  const total=exam.questions.length;
+  const score=Math.round(right/total*100);
+  exam.detail=detail;exam.score=score;exam.right=right;
+  // 错题本去重保存
+  detail.forEach(d=>{
+    if(!d.ok && !wrong.some(w=>w.stem===d.q.stem)){wrong.push(d.q)}
+  });
+  save();
+  showResult();
+}
+function showResult(){
+  const {score,right,detail}=exam;
+  const fail=detail.filter(d=>!d.ok);
+  const undone=detail.filter(d=>!d.user).length;
+  document.getElementById('scoreBig').textContent=score+' 分';
+  document.getElementById('scoreBig').className='score-big '+(score>=60?'score-pass':'score-fail');
+  document.getElementById('metaRight').textContent=`答对 ${right} 题`;
+  document.getElementById('metaWrong').textContent=`答错 ${fail.length} 题`;
+  document.getElementById('metaUndone').textContent=`未答 ${undone} 题`;
+  document.getElementById('reviewBox').innerHTML=detail.map((d,i)=>renderReviewItem(d,i)).join('');
+  show('result');
+}
+function renderReviewItem(d,i){
+  const {q,user,ok}=d;
+  const badge=ok?'<span class="tag-pill pill-w">正确</span>':'<span class="tag-pill pill-r">错误</span>';
+  let opts='';
+  if(q.type!=='judge'&&q.options){
+    opts=Object.entries(q.options).map(([k,v])=>{
+      let cls='';
+      if(norm(q.answer).includes(k))cls='correct';
+      else if(user===k)cls='wrong';
+      return `<div class="opt ${cls}"><span class="key">${k}</span><span>${esc(v)}</span></div>`;
+    }).join('');
+  }else{
+    opts=['对','错'].map(k=>{
+      let cls='';
+      if(norm(q.answer)===k)cls='correct';else if(user===k)cls='wrong';
+      return `<div class="opt ${cls}"><span class="key">${k==='对'?'✓':'✗'}</span><span>${k}</span></div>`;
+    }).join('');
+  }
+  return `<div class="card">
+    <div class="qhead"><span class="qtype ${q.type}">${typeName(q.type)}</span>${badge}</div>
+    <p style="margin:8px 0">${i+1}. ${esc(q.stem)}</p>
+    ${opts}
+    <p class="muted" style="margin-top:8px">你的答案：<strong>${user||'未答'}</strong>　正确答案：<strong>${esc(q.answer)}</strong></p>
+    ${q.analysis?`<div class="analysis">📘 ${esc(q.analysis)}</div>`:''}
+  </div>`;
+}
+document.getElementById('btnReview').onclick=()=>document.getElementById('reviewBox').scrollIntoView({behavior:'smooth'});
+document.getElementById('btnAgain').onclick=()=>{if(bank.length)startExamFromResult()};
+function startExamFromResult(){
+  let n=document.getElementById('setCount').value;
+  n=n==='all'?bank.length:Math.min(+n,bank.length);
+  const time=+document.getElementById('setTime').value;
+  const questions=shuffle(bank).slice(0,n);
+  exam={questions,answers:Array(questions.length).fill(null),marked:Array(questions.length).fill(false),idx:0,remain:time*60,timeUp:false};
+  show('exam');renderQ();startTimer();
+}
+
+/* ============ 错题本 ============ */
+document.getElementById('btnWrong').onclick=()=>{renderWrong();show('wrong')};
+function renderWrong(){
+  const box=document.getElementById('wrongList');
+  if(!wrong.length){box.innerHTML='<p class="muted">暂无错题，继续加油！</p>';return}
+  box.innerHTML=wrong.map((q,i)=>{
+    let opts='';
+    if(q.type!=='judge'&&q.options){
+      opts=Object.entries(q.options).map(([k,v])=>`<div class="opt"><span class="key">${k}</span><span>${esc(v)}</span></div>`).join('');
+    }else{
+      opts=['对','错'].map(k=>`<div class="opt"><span class="key">${k==='对'?'✓':'✗'}</span><span>${k}</span></div>`).join('');
+    }
+    return `<div class="card">
+      <div class="qhead"><span class="qtype ${q.type}">${typeName(q.type)}</span><span class="del" data-i="${i}">移出</span></div>
+      <p style="margin:8px 0">${esc(q.stem)}</p>${opts}
+      <p class="muted" style="margin-top:8px">正确答案：<strong>${esc(q.answer)}</strong></p>
+      ${q.analysis?`<div class="analysis">📘 ${esc(q.analysis)}</div>`:''}
+    </div>`;
+  }).join('');
+  box.querySelectorAll('.del').forEach(d=>d.onclick=()=>{wrong.splice(+d.dataset.i,1);save();renderWrong();refreshHome()});
+}
+document.getElementById('btnClearWrong').onclick=()=>{if(confirm('清空错题本？')){wrong=[];save();renderWrong();refreshHome()}};
+
+/* ============ 导航 ============ */
+document.getElementById('btnGoManage').onclick=()=>{show('manage');renderList()};
+document.getElementById('btnBackHome1').onclick=()=>show('home');
+document.getElementById('btnBackHome2').onclick=()=>show('home');
+document.getElementById('btnBackHome3').onclick=()=>show('home');
+
+refreshHome();
+</script>
+</body>
+</html>
